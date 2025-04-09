@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate,  } from "react-router-dom";
 import { IoEyeSharp } from "react-icons/io5";
 import { AiFillEyeInvisible } from "react-icons/ai";
 import { AuthContext } from "../provaider/AuthProvaider";
@@ -7,32 +7,38 @@ import { updateProfile } from "firebase/auth";
 
 const Register = () => {
   const [show, setShow] = useState(false);
-  const {createUser} = useContext(AuthContext)
+  const { createUser } = useContext(AuthContext);
+  const navigate = useNavigate(); // This should be `useNavigate` instead of `useNavigation`
+  
   const handleLogin = (e) => {
-
     e.preventDefault();
-    const name = e.target.name.value 
-    const  photo = e.target.photo.value 
-    const email = e.target.email.value 
-    const password = e.target.password.value 
-    console.log(name,photo,email,password)
-   
-    
-    createUser(email,password)
-    .then(result =>{
-      updateProfile(result.user,{
-        displayName: name, photoURL: photo
+  
+    const name = e.target.name.value;
+    const photo = e.target.photo.value;
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+  
+    // Create user using Firebase Authentication
+    createUser(email, password)
+      .then((result) => {
+        // Update profile after creating the user
+        updateProfile(result.user, {
+          displayName: name,
+          photoURL: photo,
+        })
+          .then(() => {
+            // After successfully updating the profile, navigate to the homepage
+            navigate('/');
+          })
+          .catch((error) => {
+            console.error("Error updating profile: ", error);
+          });
       })
-      updateProfile(result.user, {
-        displayName: name, photoURL: photo
-      })
-        console.log(result.user)
-    })
-    .catch(error =>{
-        console.error(error)
-    })
-    
+      .catch((error) => {
+        console.error("Error creating user: ", error);
+      });
   };
+  
   return (
     <div>
       <div className="min-h-screen  py-6 flex flex-col justify-center sm:py-12  lg:w-full">
